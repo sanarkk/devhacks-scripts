@@ -67,7 +67,7 @@ def main():
         if repository_request.status_code == 201:
             print("Repository was created.")
             teams_counter += 1
-            team_members = []  # after the loop came through one team, it clears team_members list,
+            team_members.clear()  # after the loop came through one team, it clears team_members list,
             # so other team will fill it again
         else:
             print("Repository was not created.")
