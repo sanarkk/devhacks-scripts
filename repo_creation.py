@@ -12,7 +12,6 @@ def main():
     teams = [
         [
             {
-                "github_email": "oleksandr.dimbrovskyi@gmail.com",
                 "username": "sanarkk",
             },
         ],
@@ -21,22 +20,11 @@ def main():
 
     if not GITHUB_KEY:
         print("Organization credential key was not inserted.")
-
     for team in teams:
-        team_members = []
-        for member in team:
-            member_github = requests.get(
-                f"{API_BASE_URL}/users/{member['username']}",
-            )
-            member_github_parsed = member_github.json()
-            team_members.append(f"{member_github_parsed["id"]}")
-
         team_data = {
             "name": f"Repository-number-{teams_counter} team.",
             "description": f"Team's number {teams_counter} description team.",
             "permission": "push",
-            "maintainers": team_members,  # something wrong here, problem with adding people to the team
-            # 'message': 'Invalid maintainers were specified.'
         }
         team_request = requests.post(
             f"{API_BASE_URL}/orgs/devhacks-2024/teams",
@@ -46,9 +34,21 @@ def main():
             json=team_data,
         )
         team_request_parsed = team_request.json()
-        # print(team_request_parsed) this line describes error github api returns
         if team_request.status_code == 201:
             print("Team was created")
+
+        for member in team:
+            team_member_request = requests.put(
+                f"{API_BASE_URL}/teams/{team_request_parsed['id']}/memberships/{member['username']}",
+                headers={
+                    "Authorization": f"Bearer {GITHUB_KEY}"
+                },
+                json={
+                    "role": "maintainer"
+                }
+            )
+            if team_member_request.status_code == 200:
+                print("Invitation has been sent.")
 
         repository_data = {
             "name": f"Repository-number-{teams_counter}",
@@ -67,8 +67,6 @@ def main():
         if repository_request.status_code == 201:
             print("Repository was created.")
             teams_counter += 1
-            team_members.clear()  # after the loop came through one team, it clears team_members list,
-            # so other team will fill it again
         else:
             print("Repository was not created.")
 
