@@ -19,24 +19,12 @@ def main() -> any:
 
     for team in teams:
         created_team = create_team(teams_counter)
-        team_request_converted = convert(created_team["request"])
+        team_request_converted = created_team["request"].json()
 
         for member in team:
             print(add_team_member(team_id=team_request_converted["id"], username=member["username"])["message"])
 
         print(create_repository(teams_counter=teams_counter, team_id=team_request_converted["id"])["message"])
-
-
-def send_post_request(url: str, headers: dict, data: dict) -> any:
-    return requests.post(url=url, headers=headers, json=data, )
-
-
-def send_put_request(url: str, headers: dict, data: dict) -> any:
-    return requests.put(url=url, headers=headers, json=data)
-
-
-def convert(data: any) -> dict:
-    return data.json()
 
 
 def create_team(teams_counter: int) -> dict:
@@ -45,7 +33,7 @@ def create_team(teams_counter: int) -> dict:
         "description": f"Team's number {teams_counter} description team.",
         "permission": "push",
     }
-    team_request = send_post_request(
+    team_request = requests.post(
         url=f"{API_BASE_URL}/orgs/devhacks-2024/teams",
         headers={
             "Authorization": f"Bearer {GITHUB_KEY}"
@@ -63,7 +51,7 @@ def create_team(teams_counter: int) -> dict:
 
 
 def add_team_member(team_id: int, username: str) -> dict:
-    team_member_request = send_put_request(
+    team_member_request = requests.put(
         url=f"{API_BASE_URL}/teams/{team_id}/memberships/{username}",
         headers={
             "Authorization": f"Bearer {GITHUB_KEY}"
@@ -89,7 +77,7 @@ def create_repository(teams_counter: id, team_id: int) -> dict:
         "private": False,
         "team_id": team_id
     }
-    repository_request = send_post_request(
+    repository_request = requests.post(
         url=f"{API_BASE_URL}/orgs/devhacks-2024/repos",
         headers={
             "Authorization": f"Bearer {GITHUB_KEY}",
